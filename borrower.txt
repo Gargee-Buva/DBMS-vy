@@ -1,0 +1,80 @@
+Note :- 
+
+- **Create the `borrower` table**: This table is necessary for storing borrower details, including the date of issue and the status of the book.
+- **Create the `fine` table**: This table will store any fines associated with overdue books.
+- **Insert sample data**
+- Create the `p_fine` procedure
+
+Step 1: Create the borrower Table
+
+
+CREATE TABLE borrower (
+    rollno INT PRIMARY KEY,            -- Unique ID for each borrower
+    name VARCHAR(20),                   -- Name of the borrower
+    dateofissue DATE,                   -- Date the book was issued
+    status VARCHAR(20)                  -- Status of the book ("issued" or "returned")
+);
+
+Step 2: Create the fine Table
+
+
+CREATE TABLE fine (
+    rollno INT,                         -- Roll number of the borrower
+    date DATE,                          -- Date the fine is recorded
+    amount INT,                         -- Fine amount
+    FOREIGN KEY (rollno) REFERENCES borrower(rollno) -- Links to borrower table
+);
+
+
+Step 3: Insert Sample Data (Optional for Testing)
+
+INSERT INTO borrower VALUES (1, 'Prathamesh', '2023-08-05', 'issued');
+INSERT INTO borrower VALUES (2, 'Arjun', '2024-07-03', 'issued');
+INSERT INTO borrower VALUES (3, 'Mohit', '2024-04-07', 'issued');
+INSERT INTO borrower VALUES (4, 'Kshitij', '2024-05-06', 'issued');
+
+Step 4: Create the p_fine Procedure
+
+DELIMITER //
+
+CREATE PROCEDURE p_fine(IN rno INT)  //This procedure accepts one input parameter, rno (roll number of the borrower).
+BEGIN
+    DECLARE d1 DATE;
+    DECLARE daycnt INT;
+    DECLARE fine_amt INT;
+
+    -- Step 1: Retrieve the issue date for the borrower
+    SELECT ateofissue INTO d1
+    FROM borrower
+    WHERE rollno = rno;
+    
+
+    -- Step 2: Calculate the number of days since the book was issued
+    SELECT DATEDIFF(now(), d1) INTO daycnt;
+//Calculates the difference in days between the current date (NOW()) and d1 (the date of issue)
+
+    -- Step 3: Fine calculation and book status update
+    IF daycnt >= 15 AND daycnt <= 30 THEN
+        SET fine_amt = daycnt * 5; -- Rs 5 per day if overdue between 15 to 30 days
+    ELSIF daycnt > 30 THEN
+        SET fine_amt = daycnt * 50; -- Rs 50 per day if overdue more than 30 days
+    ELSE
+        SET fine_amt = 0; -- No fine if overdue less than 15 days
+    END IF;
+
+    -- Step 4: Insert fine details into the fine table if a fine is applicable
+    IF fine_amt > 0 THEN
+        INSERT INTO fine (rollno, date, amount)
+        VALUES (rno, NOW(), fine_amt);
+    END IF;
+
+    -- Step 5: Update the status of the borrower to "Returned"
+    UPDATE borrower
+    SET status = "Returned"
+    WHERE rollno = rno;
+
+END //
+
+DELIMITER ;
+
+//mysql -h 192.168.2.232 -u TEA25 -P 

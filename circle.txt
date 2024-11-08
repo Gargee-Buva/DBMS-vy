@@ -1,0 +1,25 @@
+
+CREATE TABLE AREAS(RADIUS FLOAT, AREA FLOAT);
+DROP PROCEDURE IF ALREADY EXISTS FIND_CIRCLE_AREA()
+
+delimiter // 
+
+CREATE PROCEDURE FIND_CIRCLE_AREA()
+BEGIN  //BEGIN` marks the start of the procedure’s main code block.
+    `DECLARE  R INT;
+    DECLARE A FLOAT;
+    SET R = 5;
+    loop_LABEL: LOOP
+        IF R > 9 THEN
+            LEAVE loop_LABEL;
+        END IF;
+        SET A = 3.14 * R * R;
+        INSERT INTO AREAS(RADIUS, AREA) VALUES(R, A);
+        SET R = R + 1;
+    END LOOP;
+END;
+
+//
+delimiter ;
+CALL FIND_CIRCLE_AREA(); 
+SELECT * FROM AREAS;                                                                                                                                                                                                                                                                                                                           

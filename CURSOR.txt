@@ -1,0 +1,112 @@
+Microsoft Windows [Version 10.0.22631.4391]
+ (c) Microsoft Corporation. All rights reserved.
+ C:\Users\ADMIN>mysql -u root -p
+ Enter password: ******
+ Welcome to the MySQL monitor.  Commands end with ; or \g.
+ Your MySQL connection id is 10
+ Server version: 8.0.39 MySQL Community Server - GPL
+ Copyright (c) 2000, 2024, Oracle and/or its affiliates.
+ Oracle is a registered trademark of Oracle Corporation and/or its
+ affiliates. Other names may be trademarks of their respective
+ owners.
+ Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+ mysql> use tea55;
+ Database changed
+ mysql> show tables;
+ +---------------------+
+ | Tables_in_tea55     
+|
+ +---------------------+
+ | areas               
+|
+ | balance_above_20000 |
+ | balance_in_nashik   |
+ | borrower            
+|
+ | circles             
+| fine                
+| lib_audit           
+| lib_book            
+| results             
+| stud_marks          
+| student_mark        
+|
+ |
+ |
+ |
+ |
+ |
+ |
+ +---------------------+
+ 11 rows in set (0.00 sec)
+ mysql> create table O_RollCall(rollno int primary key, name varchar(30));
+ Query OK, 0 rows affected (0.02 sec)
+ mysql> insert into O_RollCall(rollno, name)values(1, "Piyush"),(2, "Vivek"),(3, 
+"Kushal");
+ Query OK, 3 rows affected (0.00 sec)
+ Records: 3  Duplicates: 0  Warnings: 0
+ mysql> create table N_RollCall(n_rollno int primary key, n_name varchar(30))
+ ;
+ Query OK, 0 rows affected (0.02 sec)
+ mysql> desc O_RollCall;
++--------+-------------+------+-----+---------+-------+
+ | Field  | Type        | Null | Key | Default | Extra |
+ +--------+-------------+------+-----+---------+-------+
+ | rollno | int         | NO   | PRI | NULL    |       |
+ | name   | varchar(30) | YES  |     | NULL    |       |
+ +--------+-------------+------+-----+---------+-------+
+ 2 rows in set (0.00 sec)
+ mysql> desc N_RollCall;
+ +----------+-------------+------+-----+---------+-------+
+ | Field    | Type        | Null | Key | Default | Extra |
+ +----------+-------------+------+-----+---------+-------+
+ | n_rollno | int         | NO   | PRI | NULL    |       |
+ | n_name   | varchar(30) | YES  |     | NULL    |       |
+ +----------+-------------+------+-----+---------+-------+
+ 2 rows in set (0.00 sec)
+ mysql> drop procedure if exists my_cursor();
+    -> //
+ ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that 
+corresponds to your MySQL server version for the right syntax to use near '()' at 
+line 1
+ mysql> drop procedure if exists my_cursor;
+    ->
+    ->
+    -> //
+ Query OK, 0 rows affected, 1 warning (0.03 sec)
+ mysql> delimiter //
+ mysql> create procedure my_cursor()
+    -> begin
+    -> declare c_rollno int;
+    -> declare c_name varchar(200);
+    -> declare done INT DEFAULT 0;
+    -> declare update_cursor CURSOR FOR select rollno,name from O_RollCall where 
+rollno not in (select n_rollno from N_RollCall);
+    -> declare CONTINUE HANDLER FOR NOT FOUND set done = 1;
+    -> open update_cursor;
+    -> loop_label: LOOP
+    -> fetch update_cursor into c_rollno, c_name;
+    -> if done = 1 then
+    -> leave loop_label;
+    -> end if;
+    -> insert into N_RollCall(n_rollno, n_name)values(c_rollno, c_name);
+    -> END LOOP;
+    -> close update_cursor;
+    -> END ;
+    -> //
+ Query OK, 0 rows affected (0.01 sec)
+mysql> delimiter ;
+ mysql> call my_cursor();
+ Query OK, 0 rows affected (0.01 sec)
+ mysql> select * from N_RollCall;
+ +----------+--------+
+ | n_rollno | n_name |
+ +----------+--------+
+ |        
+1 | Piyush |
+ |        
+|        
+2 | Vivek  |
+ 3 | Kushal |
+ +----------+--------+
+ 3 rows in set (0.00 sec)

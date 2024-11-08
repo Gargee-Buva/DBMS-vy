@@ -1,0 +1,78 @@
+//mysql -h 192.168.2.232 -u TEA25 -P 
+-- Step 1: Create the tables
+CREATE TABLE studmarks (
+    rollno INT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL,
+    totalmarks INT NOT NULL
+);
+
+CREATE TABLE res (
+    rollno INT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL,
+    class VARCHAR(20) NOT NULL
+);
+
+-- Step 2: Create the function func_class to categorize the student based on marks
+DELIMITER //
+CREATE FUNCTION func_class(marks INT)
+RETURNS VARCHAR(20) DETERMINISTIC
+BEGIN
+    DECLARE returnStatement VARCHAR(20);
+
+    -- Categorize based on provided ranges
+    IF marks <= 1500 AND marks >= 990 THEN
+        SET returnStatement = "Distinction";
+    ELSEIF marks <= 989 AND marks >= 900 THEN
+        SET returnStatement = "First Class";
+    ELSEIF marks <= 899 AND marks >= 825 THEN
+        SET returnStatement = "Higher Second Class";
+    ELSE
+        SET returnStatement = "No Category"; -- For marks outside specified ranges
+    END IF;
+
+    RETURN returnStatement;
+END;
+//
+DELIMITER ;
+
+-- Step 3: Create the stored procedure proc_grade to insert the categorized result into the res table
+DELIMITER //
+CREATE PROCEDURE proc_grade(roll INT)
+BEGIN
+    DECLARE s_name VARCHAR(20);
+    DECLARE t_marks INT;
+    DECLARE s_class VARCHAR(20);
+
+    -- Handle case if roll number is not found
+    DECLARE CONTINUE HANDLER FOR NOT FOUND
+        SET s_name = NULL;
+
+    -- Fetch the student's name and total marks
+    SELECT name, totalmarks INTO s_name, t_marks
+    FROM studmarks
+    WHERE rollno = roll;
+
+    -- If roll number exists, categorize and insert the result
+    IF s_name IS NOT NULL THEN
+        SET s_class = func_class(t_marks);
+        INSERT INTO res (rollno, name, class) VALUES (roll, s_name, s_class);
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- Step 4: Test the procedure by inserting a student's data and calling proc_grade
+-- Sample data insertion
+INSERT INTO studmarks VALUES (101, 'Priti', 1450),
+                             (102, 'Ritika', 970),
+                             (103, 'Pratiksha', 860),
+                             (104, 'Minu', 830);
+
+-- Execute the procedure for each student
+CALL proc_grade(101);
+CALL proc_grade(102);
+CALL proc_grade(103);
+CALL proc_grade(104);
+
+-- Verify the results
+SELECT * FROM res;
