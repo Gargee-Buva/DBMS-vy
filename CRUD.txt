@@ -1,6 +1,6 @@
 create  a database -  use database_name
 
- create collection -  db.createCollection("Collection_name")
+create collection -  db.createCollection("Collection_name")
 
 
 1. Create Operations
@@ -54,6 +54,7 @@ db.students.updateMany(
 )
 
 // Using the save method to replace the entire document
+A. modern versions of MongoDB, particularly with the new mongosh shell, the method db.collection.save() is no longer supported.
 db.students.save({
   _id: ObjectId("specificObjectId"), // Make sure to include the _id of the document to update it
   name: "John Doe",
@@ -62,6 +63,20 @@ db.students.save({
   grade: "A+",
   active: true
 })
+
+B. Use insertOne() or replaceOne() Instead . If you're updating an existing document (with the same _id), use:
+db.students.replaceOne(
+  { _id: ObjectId('681b6d2244c695d227c73bfa') },
+  {
+    _id: ObjectId('681b6d2244c695d227c73bfa'),
+    name: 'John',
+    age: 21,
+    subjects: ["Math", "English", "physics"],
+    grade: "A+",
+    active: true
+  }
+)
+
 
 4. Delete Operations
 
