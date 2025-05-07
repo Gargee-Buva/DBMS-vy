@@ -1,6 +1,10 @@
-create  a database -  use database_name
+#  In MongoDB, a collection is a group of related documents, similar to a table in relational databases like MySQL. A collection holds documents . Each document is a JSON-  like object
 
-create collection -  db.createCollection("Collection_name")
+#  A JSON format (JavaScript Object Notation) is a lightweight, text-based way to store and exchange data . In MongoDB, a document is stored in BSON (binary JSON) 
+
+#  create  a database -  use database_name
+
+#  create collection -  db.createCollection("Collection_name")
 
 
 1. Create Operations
